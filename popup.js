@@ -203,4 +203,36 @@ document.addEventListener("DOMContentLoaded", async () => {
       await fetchRestaurants(); // Fetch restaurants with the new settings
     });
   });  
+
+  document.getElementById("view-history")?.addEventListener("click", async () => {
+    const history = await loadRestaurantHistory(); // Load restaurant history from storage
+    console.log("Restaurant History: ", history);
+
+    const historyList = document.getElementById("history-list");
+    if (historyList) {
+      historyList.innerHTML = ''; // Clear previous list
+
+      // Loop through history and display each restaurant
+      history.forEach((restaurant) => {
+        const li = document.createElement("li");
+        li.textContent = restaurant.name; // Display the restaurant name
+        historyList.appendChild(li); // Append to the history list
+      });
+    } else {
+      console.error("History list element not found.");
+    }
+  });
+
+  // Example of triggering restaurant selection (to be customized based on your actual UI)
+  document.getElementById("wheel").addEventListener("click", (event) => {
+    const selectedRestaurant = event.target; // Assuming you have clickable items in the wheel
+    if (selectedRestaurant && selectedRestaurant.dataset.name) {
+      const restaurant = {
+        name: selectedRestaurant.dataset.name,
+        // other restaurant properties if needed
+      };
+      onRestaurantSelected(restaurant);  // Call the function to save to history
+    }
+  });
+
 });

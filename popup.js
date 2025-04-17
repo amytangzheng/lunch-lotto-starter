@@ -18,6 +18,23 @@ async function loadSettings() {
   });
 }
 
+// Load restaurant history
+async function loadRestaurantHistory() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get('restaurantHistory', (data) => {
+      resolve(data.restaurantHistory || []);
+    })
+  })
+}
+
+// Save a restaurant to history
+async function saveRestaurantToHistory(restaurant) {
+  const history = await loadRestaurantHistory();
+  history.unshift(restaurant);
+  
+  chrome.storage.sync.set({ restaurantHistory: history });
+}
+
 async function fetchRestaurants() {
     try {
       // 🔄 Show Loading GIF and Hide the Wheel
@@ -117,6 +134,27 @@ async function fetchRestaurants() {
     // Redraw the wheel with the updated options
     drawWheel();
   }  
+
+// When restaurant is selected
+function onRestaurantSelected(restaurant) {
+  saveRestaurantToHistory(restaurant);
+  console.log("✅ Restaurant saved to history:", restaurant);
+}
+
+// Add a history button 
+document.getElementById("view-history").addEventListener("click", async () => {
+  const history = await loadRestaurantHistory();
+  console.log("Restaurant History: ", history);
+
+  const historyList = document.getElementById("history-list");
+  historyList.innerHTML = '';
+
+  history.forEach((restaurant) => {
+    const li = document.createElement("li");
+    li.textContent = restaurant.name;
+    historyList.appendChild(li);
+  })
+})
 
 // 🛠️ Toggle Settings View
 function showSettings() {

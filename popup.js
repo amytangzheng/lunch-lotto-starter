@@ -18,7 +18,7 @@ async function loadSettings() {
   });
 }
 
-async function saveRestaurantHistory(restaurant) {
+async function saveRestaurantToHistory(restaurant) {
   const history = await loadRestaurantHistory();
   history.unshift({ name: restaurant.name });
   chrome.storage.sync.set({ restaurantHistory: history });

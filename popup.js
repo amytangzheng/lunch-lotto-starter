@@ -135,26 +135,26 @@ async function fetchRestaurants() {
     drawWheel();
   }  
 
-// When restaurant is selected
-function onRestaurantSelected(restaurant) {
-  saveRestaurantToHistory(restaurant);
-  console.log("✅ Restaurant saved to history:", restaurant);
-}
+// // When restaurant is selected
+// function onRestaurantSelected(restaurant) {
+//   saveRestaurantToHistory(restaurant);
+//   console.log("✅ Restaurant saved to history:", restaurant);
+// }
 
-// Add a history button 
-document.getElementById("view-history").addEventListener("click", async () => {
-  const history = await loadRestaurantHistory();
-  console.log("Restaurant History: ", history);
+// // Add a history button 
+// document.getElementById("view-history").addEventListener("click", async () => {
+//   const history = await loadRestaurantHistory();
+//   console.log("Restaurant History: ", history);
 
-  const historyList = document.getElementById("history-list");
-  historyList.innerHTML = '';
+//   const historyList = document.getElementById("history-list");
+//   historyList.innerHTML = '';
 
-  history.forEach((restaurant) => {
-    const li = document.createElement("li");
-    li.textContent = restaurant.name;
-    historyList.appendChild(li);
-  })
-})
+//   history.forEach((restaurant) => {
+//     const li = document.createElement("li");
+//     li.textContent = restaurant.name;
+//     historyList.appendChild(li);
+//   })
+// })
 
 // 🛠️ Toggle Settings View
 function showSettings() {

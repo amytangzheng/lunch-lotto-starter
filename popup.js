@@ -18,20 +18,9 @@ async function loadSettings() {
   });
 }
 
-// Load restaurant history
-async function loadRestaurantHistory() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get('restaurantHistory', (data) => {
-      resolve(data.restaurantHistory || []);
-    })
-  })
-}
-
-// Save a restaurant to history
-async function saveRestaurantToHistory(restaurant) {
+async function saveRestaurantHistory(restaurant) {
   const history = await loadRestaurantHistory();
-  history.unshift(restaurant);
-  
+  history.unshift({ name: restaurant.name });
   chrome.storage.sync.set({ restaurantHistory: history });
 }
 
@@ -135,27 +124,6 @@ async function fetchRestaurants() {
     drawWheel();
   }  
 
-// When restaurant is selected
-function onRestaurantSelected(restaurant) {
-  saveRestaurantToHistory(restaurant);
-  console.log("✅ Restaurant saved to history:", restaurant);
-}
-
-// Add a history button 
-document.getElementById("view-history").addEventListener("click", async () => {
-  const history = await loadRestaurantHistory();
-  console.log("Restaurant History: ", history);
-
-  const historyList = document.getElementById("history-list");
-  historyList.innerHTML = '';
-
-  history.forEach((restaurant) => {
-    const li = document.createElement("li");
-    li.textContent = restaurant.name;
-    historyList.appendChild(li);
-  })
-})
-
 // 🛠️ Toggle Settings View
 function showSettings() {
   document.getElementById("main-view").style.display = "none";
@@ -167,11 +135,28 @@ function hideSettings() {
   document.getElementById("settings-view").style.display = "none";
 }
 
+// Ensure scripts run only after DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchRestaurants();
 
   // Spin button event
-  document.getElementById("spin").addEventListener("click", () => spin());
+  // document.getElementById("spin").addEventListener("click", () => spin());
+  // When the user clicks the Spin button
+document.getElementById("spin").addEventListener("click", async () => {
+  const selectedRestaurant = getSelectedRestaurant();  // Get the selected restaurant after spin
+  if (selectedRestaurant) {
+    saveRestaurantToHistory(selectedRestaurant);  // Save the selected restaurant to history
+    console.log("✅ Restaurant saved to history:", selectedRestaurant.name);
+  }
+});
+
+// Function to get the selected restaurant (after the wheel spins)
+function getSelectedRestaurant() {
+  // Here we just return the first selected restaurant from the restaurantDetails array
+  // This is assuming your wheel spins and selects the first restaurant from the list
+  const selectedRestaurant = restaurantDetails[0];  // Modify this logic if needed
+  return selectedRestaurant;
+}
 
   // Open settings view
   document.getElementById("open-settings").addEventListener("click", showSettings);
@@ -188,7 +173,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("save-settings").addEventListener("click", async () => {
     const distance = parseFloat(document.getElementById("distance").value);
     const price = document.getElementById("price").value;
-
+  
     // Save the updated settings
     chrome.storage.sync.set({ distance, price }, async () => {
       swal({
@@ -196,64 +181,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "success",
         button: false, // Hide the default OK button
       });
-
+  
       // Hide the settings view and fetch new restaurants
       hideSettings();
       await fetchRestaurants(); // Fetch restaurants with the new settings
     });
-  });
+  });  
 
-  // Add a history button event
-  document.getElementById("view-history").addEventListener("click", async () => {
-    const history = await loadRestaurantHistory(); // Load restaurant history from storage
-    console.log("Restaurant History: ", history);
-
-    const historyList = document.getElementById("history-list");
-    if (historyList) {
-      historyList.innerHTML = ''; // Clear previous list
-
-      // Loop through history and display each restaurant
-      history.forEach((restaurant) => {
-        const li = document.createElement("li");
-        li.textContent = restaurant.name; // Display the restaurant name
-        historyList.appendChild(li); // Append to the history list
-      });
-    } else {
-      console.error("History list element not found.");
-    }
-  });
-
-  // Trigger restaurant selection (using data-name attribute)
-  document.getElementById("wheel").addEventListener("click", (event) => {
-    const selectedRestaurant = event.target.closest('[data-name]');  // Use closest to find restaurant
-    if (selectedRestaurant) {
-      const restaurant = {
-        name: selectedRestaurant.dataset.name,
-        // Add other restaurant properties if needed
-      };
-      onRestaurantSelected(restaurant);  // Save the selected restaurant to history
-    }
-  });
-});
-
-// When a restaurant is selected
-function onRestaurantSelected(restaurant) {
-  saveRestaurantToHistory(restaurant);  // Save to history
-  console.log("✅ Restaurant saved to history:", restaurant);
-}
-
-// Add a history button
-document.getElementById("view-history")?.addEventListener("click", async () => {
-  const history = await loadRestaurantHistory(); // Load restaurant history from storage
-  console.log("Restaurant History: ", history);
-
-  const historyList = document.getElementById("history-list");
-  historyList.innerHTML = ''; // Clear previous list
-
-  // Loop through history and display each restaurant
-  history.forEach((restaurant) => {
-    const li = document.createElement("li");
-    li.textContent = restaurant.name; // Display restaurant name
-    historyList.appendChild(li); // Append to the history list
-  });
 });

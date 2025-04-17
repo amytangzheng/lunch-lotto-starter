@@ -167,7 +167,6 @@ function hideSettings() {
   document.getElementById("settings-view").style.display = "none";
 }
 
-// Ensure scripts run only after DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchRestaurants();
 
@@ -189,7 +188,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("save-settings").addEventListener("click", async () => {
     const distance = parseFloat(document.getElementById("distance").value);
     const price = document.getElementById("price").value;
-  
+
     // Save the updated settings
     chrome.storage.sync.set({ distance, price }, async () => {
       swal({
@@ -197,14 +196,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         icon: "success",
         button: false, // Hide the default OK button
       });
-  
+
       // Hide the settings view and fetch new restaurants
       hideSettings();
       await fetchRestaurants(); // Fetch restaurants with the new settings
     });
-  });  
+  });
 
-  document.getElementById("view-history")?.addEventListener("click", async () => {
+  // Add a history button event
+  document.getElementById("view-history").addEventListener("click", async () => {
     const history = await loadRestaurantHistory(); // Load restaurant history from storage
     console.log("Restaurant History: ", history);
 
@@ -223,16 +223,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Example of triggering restaurant selection (to be customized based on your actual UI)
+  // Trigger restaurant selection (using data-name attribute)
   document.getElementById("wheel").addEventListener("click", (event) => {
-    const selectedRestaurant = event.target; // Assuming you have clickable items in the wheel
-    if (selectedRestaurant && selectedRestaurant.dataset.name) {
+    const selectedRestaurant = event.target.closest('[data-name]');  // Use closest to find restaurant
+    if (selectedRestaurant) {
       const restaurant = {
         name: selectedRestaurant.dataset.name,
-        // other restaurant properties if needed
+        // Add other restaurant properties if needed
       };
-      onRestaurantSelected(restaurant);  // Call the function to save to history
+      onRestaurantSelected(restaurant);  // Save the selected restaurant to history
     }
   });
+});
 
+// When a restaurant is selected
+function onRestaurantSelected(restaurant) {
+  saveRestaurantToHistory(restaurant);  // Save to history
+  console.log("✅ Restaurant saved to history:", restaurant);
+}
+
+// Add a history button
+document.getElementById("view-history")?.addEventListener("click", async () => {
+  const history = await loadRestaurantHistory(); // Load restaurant history from storage
+  console.log("Restaurant History: ", history);
+
+  const historyList = document.getElementById("history-list");
+  historyList.innerHTML = ''; // Clear previous list
+
+  // Loop through history and display each restaurant
+  history.forEach((restaurant) => {
+    const li = document.createElement("li");
+    li.textContent = restaurant.name; // Display restaurant name
+    historyList.appendChild(li); // Append to the history list
+  });
 });

@@ -236,6 +236,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Close settings view
   document.getElementById("close-settings").addEventListener("click", hideSettings);
 
+  // View history button event
+  document.getElementById("view-history").addEventListener("click", toggleHistory);
+
   // Load saved settings into inputs
   const settings = await loadSettings();
   document.getElementById("distance").value = settings.distance;

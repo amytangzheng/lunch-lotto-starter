@@ -1,4 +1,4 @@
-const apiKey = "AIzaSyD0KfICYZPmjMdua81xy3pg-ZiD9NbX1pg";
+const apiKey = "YOUR_API_KEY";
 const defaultSettings = {
   distance: 0.5,       // Default search radius in miles
   price: "2,3",        // Google Places API uses 1-4 ($ - $$$$)
@@ -18,21 +18,69 @@ async function loadSettings() {
   });
 }
 
-// Function to load restaurant history from chrome.storage
-async function loadRestaurantHistory() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get('restaurantHistory', (data) => {
-      resolve(data.restaurantHistory || []);  // Return empty array if no history exists
-    });
+// Save selected restaurant to history
+async function saveToHistory(restaurant) {
+  const result = await chrome.storage.sync.get({ restaurantHistory: [] });
+  const history = result.restaurantHistory;
+
+  history.unshift(restaurantName);
+
+  await chrome.storage.sync.set({ restaurantHistory: history });
+
+  if (document.getElementById("history-list").style.display === "block") {
+    displayHistory();
+  }
+}
+
+// Display history 
+async function displayHistory() {
+  const historyList = document.getElementById("history-list");
+  historyList.innerHTML = ""; // Clear current list
+  
+  const result = await chrome.storage.sync.get({ restaurantHistory: [] });
+  const history = result.restaurantHistory;
+  
+  if (history.length === 0) {
+    const emptyItem = document.createElement("li");
+    emptyItem.textContent = "No history yet. Spin the wheel to start!";
+    historyList.appendChild(emptyItem);
+    return;
+  }
+  
+  // Add each history item - just the restaurant name
+  history.forEach(restaurantName => {
+    const li = document.createElement("li");
+    li.textContent = restaurantName;
+    historyList.appendChild(li);
   });
 }
 
-async function saveRestaurantToHistory(restaurant) {
-  const history = await loadRestaurantHistory();
-  history.unshift({ name: restaurant.name });
-  chrome.storage.sync.set({ restaurantHistory: history }, () => {
-    console.log("✅ History saved:", history);  // Log the saved history to the console
+// Clear the history
+async function clearHistory() {
+  await chrome.storage.sync.set({ restaurantHistory: [] });
+  displayHistory(); // Refresh the display
+  swal({
+    title: "History cleared!",
+    icon: "success",
+    button: false,
   });
+}
+
+// Toggle history view
+function toggleHistory() {
+  const historyList = document.getElementById("history-list");
+  const mainView = document.getElementById("main-view");
+  const settingsView = document.getElementById("settings-view");
+  
+  if (historyList.style.display === "none") {
+    historyList.style.display = "block";
+    mainView.style.display = "none";
+    settingsView.style.display = "none";
+    displayHistory();
+  } else {
+    historyList.style.display = "none";
+    mainView.style.display = "block";
+  }
 }
 
 async function fetchRestaurants() {
@@ -146,28 +194,41 @@ function hideSettings() {
   document.getElementById("settings-view").style.display = "none";
 }
 
+// Go back to main view from history
+function hideHistory() {
+  document.getElementById("history-list").style.display = "none";
+  document.getElementById("main-view").style.display = "block";
+}
+
+// Modified spin function to save selected restaurant to history
+// This assumes there's a global spin function defined in wheel.js that we need to modify
+// We'll create a wrapper function to add history functionality
+const originalSpin = window.spin; // Store the original spin function
+
+window.spin = function() {
+  // Call the original spin function
+  originalSpin();
+  
+  // Get the selected restaurant from the result and add to history
+  // This needs to be done after the wheel stops, so we use a timeout
+  setTimeout(() => {
+    const selectedRestaurantElement = document.getElementById("selected-restaurant");
+    if (selectedRestaurantElement && selectedRestaurantElement.textContent) {
+      // Extract just the restaurant name from the text content
+      const restaurantName = selectedRestaurantElement.textContent.replace("You're going to ", "").replace("!", "");
+      
+      // Save just the restaurant name
+      saveToHistory(restaurantName);
+    }
+  }, 3000); // Adjust timing based on how long the wheel animation takes
+};
+
 // Ensure scripts run only after DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchRestaurants();
 
   // Spin button event
-  // document.getElementById("spin").addEventListener("click", () => spin());
-  // When the user clicks the Spin button
-document.getElementById("spin").addEventListener("click", async () => {
-  const selectedRestaurant = getSelectedRestaurant();  // Get the selected restaurant after spin
-  if (selectedRestaurant) {
-    saveRestaurantToHistory(selectedRestaurant);  // Save the selected restaurant to history
-    console.log("✅ Restaurant saved to history:", selectedRestaurant.name);
-  }
-});
-
-// Function to get the selected restaurant (after the wheel spins)
-function getSelectedRestaurant() {
-  // Here we just return the first selected restaurant from the restaurantDetails array
-  // This is assuming your wheel spins and selects the first restaurant from the list
-  const selectedRestaurant = restaurantDetails[0];  // Modify this logic if needed
-  return selectedRestaurant;
-}
+  document.getElementById("spin").addEventListener("click", () => spin());
 
   // Open settings view
   document.getElementById("open-settings").addEventListener("click", showSettings);
@@ -198,5 +259,4 @@ function getSelectedRestaurant() {
       await fetchRestaurants(); // Fetch restaurants with the new settings
     });
   });  
-
 });

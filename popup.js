@@ -27,14 +27,14 @@ async function saveToHistory(restaurant) {
 
   await chrome.storage.sync.set({ restaurantHistory: history });
 
-  if (document.getElementById("history-list").style.display === "block") {
+  if (document.getElementById("history-view").style.display === "block") {
     displayHistory();
   }
 }
 
 // Display history 
 async function displayHistory() {
-  const historyList = document.getElementById("history-list");
+  const historyList = document.getElementById("history-view");
   historyList.innerHTML = ""; // Clear current list
   
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
@@ -64,23 +64,6 @@ async function clearHistory() {
     icon: "success",
     button: false,
   });
-}
-
-// Toggle history view
-function toggleHistory() {
-  const historyList = document.getElementById("history-list");
-  const mainView = document.getElementById("main-view");
-  const settingsView = document.getElementById("settings-view");
-  
-  if (historyList.style.display === "none") {
-    historyList.style.display = "block";
-    mainView.style.display = "none";
-    settingsView.style.display = "none";
-    displayHistory();
-  } else {
-    historyList.style.display = "none";
-    mainView.style.display = "block";
-  }
 }
 
 async function fetchRestaurants() {
@@ -203,7 +186,7 @@ function showHistory() {
 // Go back to main view from history
 function hideHistory() {
   document.getElementById("main-view").style.display = "block";
-  document.getElementById("history-list").style.display = "none";
+  document.getElementById("history-view").style.display = "none";
 }
 
 // Modified spin function to save selected restaurant to history

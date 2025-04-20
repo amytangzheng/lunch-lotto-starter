@@ -27,14 +27,14 @@ async function saveToHistory(restaurant) {
 
   await chrome.storage.sync.set({ restaurantHistory: history });
 
-  if (document.getElementById("history-items").style.display === "block") {
+  if (document.getElementById("history-view").style.display === "block") {
     displayHistory();
   }
 }
 
 // Display history 
 async function displayHistory() {
-  const historyList = document.getElementById("history-items");
+  const historyList = document.getElementById("history-view");
   // historyList.innerHTML = ""; // Clear current list
   
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });

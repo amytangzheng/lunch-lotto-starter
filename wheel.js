@@ -161,7 +161,8 @@ function truncateOption(option) {
       const selectedOption = options[options.length - 1 - selectedIndex];
         
       saveToHistory(selectedOption);
-      
+      console.log("set to history", selectedOption);
+
       // Motivational messages to encourage the user
       const messages = [
         "Time to fuel your body with something nutritious! 🍎",

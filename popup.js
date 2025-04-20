@@ -18,10 +18,21 @@ async function loadSettings() {
   });
 }
 
+// Function to load restaurant history from chrome.storage
+async function loadRestaurantHistory() {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get('restaurantHistory', (data) => {
+      resolve(data.restaurantHistory || []);  // Return empty array if no history exists
+    });
+  });
+}
+
 async function saveRestaurantToHistory(restaurant) {
   const history = await loadRestaurantHistory();
   history.unshift({ name: restaurant.name });
-  chrome.storage.sync.set({ restaurantHistory: history });
+  chrome.storage.sync.set({ restaurantHistory: history }, () => {
+    console.log("✅ History saved:", history);  // Log the saved history to the console
+  });
 }
 
 async function fetchRestaurants() {

@@ -1,6 +1,6 @@
-const apiKey = "AIzaSyD0KfICYZPmjMdua81xy3pg-ZiD9NbX1pg";
+const apiKey = "fsq3+k/CcVRsGDn5krixTAvKbO1At1byzQsaI/9nVWN2qVU=";
 const defaultSettings = {
-  distance: 0.5,       // Default search radius in miles
+  distance: 22000 ,       // Default search radius in meters
   price: "2,3",        // Google Places API uses 1-4 ($ - $$$$)
   dietary: "",         // Empty means no filter (future: vegetarian, gluten-free, etc.)
 };
@@ -74,74 +74,93 @@ async function clearHistory() {
 
 
 async function fetchRestaurants() {
-    try {
-      // 🔄 Show Loading GIF and Hide the Wheel
-      document.getElementById("loading-gif").style.display = "block";
-      document.getElementById("wheel").style.display = "none";
-  
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude: lat, longitude: lng } = position.coords;
-        const settings = await loadSettings();
-  
-        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${milesToMeters(settings.distance)}&type=restaurant&keyword=healthy&minprice=${settings.price[0]}&maxprice=${settings.price[2]}&key=${apiKey}`;
-  
-        const response = await fetch(url);
-        const data = await response.json();
-  
-        if (!data.results || data.results.length === 0) {
-          console.error("❌ No restaurants found!");
-          alert("No restaurants found! Try adjusting your settings.");
-          return;
+  try {
+    // 🔄 Show Loading GIF and Hide the Wheel
+    document.getElementById("loading-gif").style.display = "block";
+    document.getElementById("wheel").style.display = "none";
+
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude: lat, longitude: lng } = position.coords;
+      const settings = await loadSettings();
+
+      // Foursquare API Request Options
+      const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: apiKey 
         }
-  
-        // ✅ Extract restaurant data
-        let restaurants = data.results.map((place) => ({
-          name: place.name,
-          distance: (settings.distance).toFixed(1),
-          price: place.price_level ? "$".repeat(place.price_level) : "Unknown",
-          lat: place.geometry.location.lat,
-          lng: place.geometry.location.lng,
-          placeId: place.place_id,
-          googleMapsLink: `https://www.google.com/maps/place/?q=place_id:${place.place_id}`, // Add Google Maps link
-        }));
-  
-        // ✅ Remove duplicate restaurant names
-        const seen = new Set();
-        restaurants = restaurants.filter((restaurant) => {
-          if (seen.has(restaurant.name)) {
-            return false; // Duplicate found, skip this restaurant
+      };
+
+      // Foursquare API URL for searching restaurants
+      const url = `https://api.foursquare.com/v3/places/search?radius=${(settings.distance)}&min_price=${settings.price[0]}&max_price=${settings.price[2]}`;
+
+      // Fetch restaurant data from Foursquare
+      fetch(url, options)
+        .then(res => res.json())  // Parse the response as JSON
+        .then(res => {
+          // Check if the response has results
+          if (!res.results || res.results.length === 0) {
+            console.error("❌ No restaurants found!");
+            alert("No restaurants found! Try adjusting your settings.");
+            return;
           }
-          seen.add(restaurant.name);
-          return true; // Unique restaurant, keep it
+
+          // ✅ Extract restaurant data
+          let restaurants = res.results.map((place) => ({
+            name: place.name,
+            distance: (settings.distance).toFixed(1),
+            price: place.price_level ? "$".repeat(place.price_level) : "Unknown",
+            lat: place.geocodes.main.latitude,
+            lng: place.geocodes.main.longitude,
+            placeId: place.fsq_id, // Foursquare's unique ID for the place
+            foursquareLink: `https://foursquare.com/v/${place.fsq_id}`, // Foursquare link instead of Google Maps
+          }));
+
+          // ✅ Remove duplicate restaurant names
+          const seen = new Set();
+          restaurants = restaurants.filter((restaurant) => {
+            if (seen.has(restaurant.name)) {
+              return false; // Duplicate found, skip this restaurant
+            }
+            seen.add(restaurant.name);
+            return true; // Unique restaurant, keep it
+          });
+
+          console.log("✅ Unique Restaurants fetched:", restaurants);
+
+          // ✅ Store restaurant details globally
+          restaurantDetails = restaurants.reduce((acc, r) => {
+            acc[r.name] = r;
+            return acc;
+          }, {});
+
+          // ⏳ Wait 5 seconds before showing the wheel
+          setTimeout(() => {
+            document.getElementById("loading-gif").style.display = "none"; // ✅ Hide Loading GIF
+            document.getElementById("wheel").style.display = "block"; // ✅ Show the wheel
+            updateWheel(restaurants); // ✅ Update the wheel with restaurant names
+          }, 2000);
+        })
+        .catch(err => {
+          console.error("❌ Error fetching restaurants:", err);
+          document.getElementById("loading-gif").style.display = "none"; // ✅ Hide loading GIF on error
+          document.getElementById("wheel").style.display = "block";
         });
-  
-        console.log("✅ Unique Restaurants fetched:", restaurants);
-  
-        // ✅ Store restaurant details globally
-        restaurantDetails = restaurants.reduce((acc, r) => {
-          acc[r.name] = r;
-          return acc;
-        }, {});
-  
-        // ⏳ Wait 5 seconds before showing the wheel
-        setTimeout(() => {
-          document.getElementById("loading-gif").style.display = "none"; // ✅ Hide Loading GIF
-          document.getElementById("wheel").style.display = "block"; // ✅ Show the wheel
-          updateWheel(restaurants); // ✅ Update the wheel with restaurant names
-        }, 2000);
-  
-      }, (error) => {
-        console.error("❌ Geolocation error:", error);
-        alert("Please enable location access to fetch restaurants.");
-        document.getElementById("loading-gif").style.display = "none"; // ✅ Hide loading GIF on error
-        document.getElementById("wheel").style.display = "block";
-      });
-    } catch (error) {
-      console.error("❌ Error fetching restaurants:", error);
+
+    }, (error) => {
+      console.error("❌ Geolocation error:", error);
+      alert("Please enable location access to fetch restaurants.");
       document.getElementById("loading-gif").style.display = "none"; // ✅ Hide loading GIF on error
       document.getElementById("wheel").style.display = "block";
-    }
-  }  
+    });
+  } catch (error) {
+    console.error("❌ Error fetching restaurants:", error);
+    document.getElementById("loading-gif").style.display = "none"; // ✅ Hide loading GIF on error
+    document.getElementById("wheel").style.display = "block";
+  }
+}
+
 
   function updateWheel(restaurants) {
     options.length = 0; // Clear the current options array
@@ -155,7 +174,7 @@ async function fetchRestaurants() {
     // Extract restaurant names and Google Maps links, and populate options array
     options.push(...selectedRestaurants.map((restaurant) => ({
       name: restaurant.name,
-      googleMapsLink: restaurant.googleMapsLink, // Add Google Maps link
+      foursquareLink: restaurant.foursquareLink, // Add Google Maps link
     })));
   
     // Debugging: Log the selected restaurants with their links
@@ -164,7 +183,7 @@ async function fetchRestaurants() {
     // Store full restaurant details, including names and links
     restaurantDetails = selectedRestaurants.map((restaurant) => ({
       name: restaurant.name,
-      googleMapsLink: restaurant.googleMapsLink // Add the Google Maps link
+      foursquareLink: restaurant.foursquareLink // Add the Google Maps link
     }));
   
     console.log("✅ Selected Restaurants for the Wheel:", restaurantDetails);

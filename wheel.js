@@ -188,9 +188,9 @@ function truncateOption(option) {
           paragraph.style.fontSize = "12px";
           paragraph.textContent = randomMessage; // Add the motivational message
       
-          link.href = selectedOption.googleMapsLink; // Set the Google Maps link
+          link.href = selectedOption.foursquareLink; // Set the Google Maps link
           link.target = "_blank"; // Open the link in a new tab
-          link.textContent = "View on Google Maps"; // Text for the link
+          link.textContent = "View on Foursquare"; // Text for the link
           link.style.color = "#a2a2a2"; // Optional: Add a color to the link
           link.style.fontSize = "10px";
       

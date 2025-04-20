@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   chrome.storage.sync.get(["distance", "price"], (data) => {
-    document.getElementById("distance").value = data.distance || 0.5;
+    document.getElementById("distance").value = data.distance || 22000;
     document.getElementById("price").value = data.price || "2,3";
   });
 });

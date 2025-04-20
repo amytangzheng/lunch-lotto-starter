@@ -27,15 +27,15 @@ async function saveToHistory(restaurant) {
 
   await chrome.storage.sync.set({ restaurantHistory: history });
 
-  if (document.getElementById("history-view").style.display === "block") {
+  if (document.getElementById("history-items").style.display === "block") {
     displayHistory();
   }
 }
 
 // Display history 
 async function displayHistory() {
-  const historyList = document.getElementById("history-view");
-  historyList.innerHTML = ""; // Clear current list
+  const historyList = document.getElementById("history-items");
+  // historyList.innerHTML = ""; // Clear current list
   
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
@@ -52,17 +52,6 @@ async function displayHistory() {
     const li = document.createElement("li");
     li.textContent = restaurantName;
     historyList.appendChild(li);
-  });
-}
-
-// Clear the history
-async function clearHistory() {
-  await chrome.storage.sync.set({ restaurantHistory: [] });
-  displayHistory(); // Refresh the display
-  swal({
-    title: "History cleared!",
-    icon: "success",
-    button: false,
   });
 }
 

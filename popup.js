@@ -30,11 +30,7 @@ async function saveToHistory(restaurantName) {
   // Save the updated history array back to storage
   await chrome.storage.sync.set({ restaurantHistory: history });
 
-  // If the history view is currently open, update the display
-  if (document.getElementById("history-view").style.display === "block") {
-    console.log("Displaying updated history.");
-    displayHistory();  // Refresh the history view
-  }
+  // displayHistory();
 }
 
 // Display history
@@ -178,6 +174,7 @@ function hideSettings() {
 function showHistory() {
   document.getElementById("main-view").style.display = "none";
   document.getElementById("history-view").style.display = "block";
+  displayHistory();
 }
 
 // Go back to main view from history

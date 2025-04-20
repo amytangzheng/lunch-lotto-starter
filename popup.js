@@ -18,28 +18,31 @@ async function loadSettings() {
   });
 }
 
-// Save selected restaurant to history
-async function saveToHistory(restaurant) {
+// Save selected restaurant name to history
+async function saveToHistory(restaurantName) {
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
 
-  history.unshift(restaurant);
-  console.log(history)
+  // Save the restaurant name to history (not the full object)
+  history.unshift(restaurantName);
+  console.log("History after adding restaurant:", history);
 
+  // Save the updated history array back to storage
   await chrome.storage.sync.set({ restaurantHistory: history });
 
+  // If the history view is currently open, update the display
   if (document.getElementById("history-view").style.display === "block") {
-    console.log("in saveToHistory")
-    displayHistory();
+    console.log("Displaying updated history.");
+    displayHistory();  // Refresh the history view
   }
 }
 
-// Display history 
+// Display history
 async function displayHistory() {
-  const historyList = document.getElementById("history-view");
-  // historyList.innerHTML = ""; // Clear current list
+  const historyList = document.getElementById("history-items");  // This is the correct list element inside the history-view
+  historyList.innerHTML = ""; // Clear current list
   
-  console.log(historyList)
+  console.log("Displaying history, list element:", historyList);
 
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
@@ -50,14 +53,15 @@ async function displayHistory() {
     historyList.appendChild(emptyItem);
     return;
   }
-  
-  // Add each history item - just the restaurant name
-  history.forEach(restaurant => {
+
+  // Add each history item (just the restaurant name)
+  history.forEach(restaurantName => {
     const li = document.createElement("li");
-    li.textContent = restaurant;
+    li.textContent = restaurantName;  // Only the restaurant name (no need for .name)
     historyList.appendChild(li);
   });
 }
+
 
 async function fetchRestaurants() {
     try {

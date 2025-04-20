@@ -94,6 +94,8 @@ async function fetchRestaurants() {
 
       const data = await response.json();
 
+      console.log("Foursquare API Response:", data);
+
       if (!data.results || data.results.length === 0) {
         console.error("❌ No restaurants found!");
         alert("No restaurants found! Try adjusting your settings.");

@@ -93,9 +93,6 @@ async function fetchRestaurants() {
       };
 
       // Foursquare API URL for searching restaurants
-      // const url = 'https://api.foursquare.com/v3/places/search?radius=${milesToMeters(settings.distance)}&min_price=${settings.price[0]}&max_price=${settings.price[2]}';
-
-      console.log(settings.distance, settings.price)
       const url = `https://api.foursquare.com/v3/places/search?radius=${(settings.distance)}&min_price=${settings.price[0]}&max_price=${settings.price[2]}`;
 
       // Fetch restaurant data from Foursquare
@@ -243,7 +240,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load saved settings into inputs
   const settings = await loadSettings();
-  console.log(settings)
   document.getElementById("distance").value = settings.distance;
   document.getElementById("price").value = settings.price;
 

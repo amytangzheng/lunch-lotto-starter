@@ -72,7 +72,6 @@ async function clearHistory() {
   });
 }
 
-import fsqDevelopers from '@api/fsq-developers';
 
 async function fetchRestaurants() {
   try {
@@ -84,38 +83,41 @@ async function fetchRestaurants() {
       const { latitude: lat, longitude: lng } = position.coords;
       const settings = await loadSettings();
 
-      // Use the apiKey variable instead of hardcoding the API key
-      fsqDevelopers.auth(apiKey);  // Use the apiKey variable
+      // Foursquare API Request Options
+      const options = {
+        method: 'GET',
+        headers: {
+          accept: 'application/json',
+          Authorization: 'Bearer fsq3+k/CcVRsGDn5krixTAvKbO1At1byzQsaI/9nVWN2qVU='  // Use the actual API key here
+        }
+      };
 
-      // Foursquare API URL for searching places (restaurants)
+      // Foursquare API URL for searching restaurants
       const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${milesToMeters(settings.distance)}&query=healthy&categories=food&limit=10`;
 
-      fsqDevelopers.placeSearch({
-        ll: `${lat},${lng}`,  // Pass location (latitude, longitude)
-        radius: milesToMeters(settings.distance),  // Radius in meters
-        query: 'restaurant',  // Search for restaurants
-        limit: 10,  // Limit the results to 10 places
-      })
-        .then(({ data }) => {
-          // Process the data
-          if (!data || data.length === 0) {
+      // Fetch restaurant data from Foursquare
+      fetch(url, options)
+        .then(res => res.json())  // Parse the response as JSON
+        .then(res => {
+          // Check if the response has results
+          if (!res.results || res.results.length === 0) {
             console.error("❌ No restaurants found!");
             alert("No restaurants found! Try adjusting your settings.");
             return;
           }
 
-          // Map through the data to format it for the wheel
-          let restaurants = data.map(place => ({
+          // ✅ Extract restaurant data
+          let restaurants = res.results.map((place) => ({
             name: place.name,
             distance: (settings.distance).toFixed(1),
             price: place.price_level ? "$".repeat(place.price_level) : "Unknown",
             lat: place.geocodes.main.latitude,
             lng: place.geocodes.main.longitude,
-            placeId: place.fsq_id,
-            googleMapsLink: `https://foursquare.com/v/${place.fsq_id}`, // Link to Foursquare page
+            placeId: place.fsq_id, // Foursquare's unique ID for the place
+            googleMapsLink: `https://foursquare.com/v/${place.fsq_id}`, // Foursquare link instead of Google Maps
           }));
 
-          // Remove duplicate restaurant names
+          // ✅ Remove duplicate restaurant names
           const seen = new Set();
           restaurants = restaurants.filter((restaurant) => {
             if (seen.has(restaurant.name)) {
@@ -127,7 +129,7 @@ async function fetchRestaurants() {
 
           console.log("✅ Unique Restaurants fetched:", restaurants);
 
-          // Store restaurant details globally
+          // ✅ Store restaurant details globally
           restaurantDetails = restaurants.reduce((acc, r) => {
             acc[r.name] = r;
             return acc;

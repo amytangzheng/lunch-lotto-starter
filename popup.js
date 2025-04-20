@@ -23,11 +23,13 @@ async function saveToHistory(restaurant) {
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
 
-  history.unshift(restaurant.name);
+  history.unshift(restaurant);
+  console.log(history)
 
   await chrome.storage.sync.set({ restaurantHistory: history });
 
   if (document.getElementById("history-view").style.display === "block") {
+    console.log("in saveToHistory")
     displayHistory();
   }
 }
@@ -37,6 +39,8 @@ async function displayHistory() {
   const historyList = document.getElementById("history-view");
   // historyList.innerHTML = ""; // Clear current list
   
+  console.log(historyList)
+
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
   
@@ -50,7 +54,7 @@ async function displayHistory() {
   // Add each history item - just the restaurant name
   history.forEach(restaurant => {
     const li = document.createElement("li");
-    li.textContent = restaurantName;
+    li.textContent = restaurant;
     historyList.appendChild(li);
   });
 }

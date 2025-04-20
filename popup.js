@@ -95,6 +95,9 @@ async function fetchRestaurants() {
       // Foursquare API URL for searching restaurants
       const url = `https://api.foursquare.com/v3/places/search?ll=${lat},${lng}&radius=${milesToMeters(settings.distance)}&query=healthy&categories=food&limit=10`;
 
+      console.log("Options:", options);
+      console.log("Request URL:", url);
+      
       // Fetch restaurant data from Foursquare
       fetch(url, options)
         .then(res => res.json())  // Parse the response as JSON

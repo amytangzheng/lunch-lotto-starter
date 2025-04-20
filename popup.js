@@ -243,6 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load saved settings into inputs
   const settings = await loadSettings();
+  console.log(settings)
   document.getElementById("distance").value = settings.distance;
   document.getElementById("price").value = settings.price;
 

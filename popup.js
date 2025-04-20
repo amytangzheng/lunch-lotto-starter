@@ -88,7 +88,7 @@ async function fetchRestaurants() {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: 'Bearer fsq3+k/CcVRsGDn5krixTAvKbO1At1byzQsaI/9nVWN2qVU='  // Use the actual API key here
+          Authorization: apiKey 
         }
       };
 

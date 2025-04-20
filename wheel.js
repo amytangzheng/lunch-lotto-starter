@@ -160,6 +160,8 @@ function truncateOption(option) {
       const selectedIndex = Math.floor(normalizedDegrees / (360 / options.length));
       const selectedOption = options[options.length - 1 - selectedIndex];
         
+      saveToHistory(selectedOption);
+      
       // Motivational messages to encourage the user
       const messages = [
         "Time to fuel your body with something nutritious! 🍎",

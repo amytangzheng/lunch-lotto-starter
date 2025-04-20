@@ -178,29 +178,6 @@ function hideHistory() {
   document.getElementById("history-view").style.display = "none";
 }
 
-// Modified spin function to save selected restaurant to history
-// This assumes there's a global spin function defined in wheel.js that we need to modify
-// We'll create a wrapper function to add history functionality
-const originalSpin = window.spin; // Store the original spin function
-
-window.spin = function() {
-  // Call the original spin function
-  originalSpin();
-  
-  // Get the selected restaurant from the result and add to history
-  // This needs to be done after the wheel stops, so we use a timeout
-  setTimeout(() => {
-    const selectedRestaurantElement = document.getElementById("selected-restaurant");
-    if (selectedRestaurantElement && selectedRestaurantElement.textContent) {
-      // Extract just the restaurant name from the text content
-      const restaurantName = selectedRestaurantElement.textContent.replace("You're going to ", "").replace("!", "");
-      
-      // Save just the restaurant name
-      saveToHistory(restaurantName);
-    }
-  }, 3000); // Adjust timing based on how long the wheel animation takes
-};
-
 // Ensure scripts run only after DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {
   await fetchRestaurants();

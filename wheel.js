@@ -160,8 +160,8 @@ function truncateOption(option) {
       const selectedIndex = Math.floor(normalizedDegrees / (360 / options.length));
       const selectedOption = options[options.length - 1 - selectedIndex];
         
-      saveToHistory(selectedOption);
-      console.log("set to history", selectedOption);
+      saveToHistory(selectedOption.name);
+      console.log("set to history", selectedOption.name);
 
       // Motivational messages to encourage the user
       const messages = [

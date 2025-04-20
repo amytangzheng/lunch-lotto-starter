@@ -23,7 +23,7 @@ async function saveToHistory(restaurant) {
   const result = await chrome.storage.sync.get({ restaurantHistory: [] });
   const history = result.restaurantHistory;
 
-  history.unshift(restaurantName);
+  history.unshift(restaurant.name);
 
   await chrome.storage.sync.set({ restaurantHistory: history });
 
@@ -48,7 +48,7 @@ async function displayHistory() {
   }
   
   // Add each history item - just the restaurant name
-  history.forEach(restaurantName => {
+  history.forEach(restaurant => {
     const li = document.createElement("li");
     li.textContent = restaurantName;
     historyList.appendChild(li);

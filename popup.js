@@ -1,4 +1,4 @@
-const apiKey = "YOUR_API_KEY";
+const apiKey = "AIzaSyD0KfICYZPmjMdua81xy3pg-ZiD9NbX1pg";
 const defaultSettings = {
   distance: 0.5,       // Default search radius in miles
   price: "2,3",        // Google Places API uses 1-4 ($ - $$$$)
@@ -203,25 +203,25 @@ function hideHistory() {
 // Modified spin function to save selected restaurant to history
 // This assumes there's a global spin function defined in wheel.js that we need to modify
 // We'll create a wrapper function to add history functionality
-// const originalSpin = window.spin; // Store the original spin function
+const originalSpin = window.spin; // Store the original spin function
 
-// window.spin = function() {
-//   // Call the original spin function
-//   originalSpin();
+window.spin = function() {
+  // Call the original spin function
+  originalSpin();
   
-//   // Get the selected restaurant from the result and add to history
-//   // This needs to be done after the wheel stops, so we use a timeout
-//   setTimeout(() => {
-//     const selectedRestaurantElement = document.getElementById("selected-restaurant");
-//     if (selectedRestaurantElement && selectedRestaurantElement.textContent) {
-//       // Extract just the restaurant name from the text content
-//       const restaurantName = selectedRestaurantElement.textContent.replace("You're going to ", "").replace("!", "");
+  // Get the selected restaurant from the result and add to history
+  // This needs to be done after the wheel stops, so we use a timeout
+  setTimeout(() => {
+    const selectedRestaurantElement = document.getElementById("selected-restaurant");
+    if (selectedRestaurantElement && selectedRestaurantElement.textContent) {
+      // Extract just the restaurant name from the text content
+      const restaurantName = selectedRestaurantElement.textContent.replace("You're going to ", "").replace("!", "");
       
-//       // Save just the restaurant name
-//       saveToHistory(restaurantName);
-//     }
-//   }, 3000); // Adjust timing based on how long the wheel animation takes
-// };
+      // Save just the restaurant name
+      saveToHistory(restaurantName);
+    }
+  }, 3000); // Adjust timing based on how long the wheel animation takes
+};
 
 // Ensure scripts run only after DOM is loaded
 document.addEventListener("DOMContentLoaded", async () => {

@@ -83,35 +83,20 @@ async function fetchRestaurants() {
       const { latitude: lat, longitude: lng } = position.coords;
       const settings = await loadSettings();
 
-      // Foursquare API Request URL
-      const url = 'https://api.foursquare.com/v3/places/search';
-
       // Foursquare API Request Options
       const options = {
         method: 'GET',
         headers: {
           accept: 'application/json',
-          Authorization: `Bearer ${apiKey}`, // Use the actual API key here
+          Authorization: apiKey 
         }
       };
 
-      // Add query parameters to the URL dynamically
-      const params = new URLSearchParams({
-        ll: `${lat},${lng}`,  // User's latitude and longitude
-        radius: milesToMeters(settings.distance),  // Convert miles to meters
-        query: 'healthy',  // Search for healthy restaurants (can be changed to "coffee", "pizza", etc.)
-        categories: 'food',  // Filter by food-related places (e.g., restaurants)
-        limit: 10,  // Limit the results to 10
-      });
+      // Foursquare API URL for searching restaurants
+      const url = 'https://api.foursquare.com/v3/places/search?radius=${milesToMeters(settings.distance)}&min_price=${settings.price[0]}&max_price=${settings.price[2]}';
 
-      // Final URL with appended query parameters
-      const finalUrl = `${url}?${params.toString()}`;
-
-      // Log the final URL for debugging
-      console.log("Request URL:", finalUrl);
-
-      // Fetch restaurant data from Foursquare API
-      fetch(finalUrl, options)
+      // Fetch restaurant data from Foursquare
+      fetch(url, options)
         .then(res => res.json())  // Parse the response as JSON
         .then(res => {
           // Check if the response has results
@@ -121,20 +106,20 @@ async function fetchRestaurants() {
             return;
           }
 
-          // Filter the results based on distance (if needed)
-          let filteredRestaurants = res.results.map((place) => ({
+          // ✅ Extract restaurant data
+          let restaurants = res.results.map((place) => ({
             name: place.name,
             distance: (settings.distance).toFixed(1),
             price: place.price_level ? "$".repeat(place.price_level) : "Unknown",
             lat: place.geocodes.main.latitude,
             lng: place.geocodes.main.longitude,
             placeId: place.fsq_id, // Foursquare's unique ID for the place
-            googleMapsLink: `https://foursquare.com/v/${place.fsq_id}`, // Foursquare link instead of Google Maps
+            foursquareLink: `https://foursquare.com/v/${place.fsq_id}`, // Foursquare link instead of Google Maps
           }));
 
-          // Remove duplicate restaurant names
+          // ✅ Remove duplicate restaurant names
           const seen = new Set();
-          filteredRestaurants = filteredRestaurants.filter((restaurant) => {
+          restaurants = restaurants.filter((restaurant) => {
             if (seen.has(restaurant.name)) {
               return false; // Duplicate found, skip this restaurant
             }
@@ -142,10 +127,10 @@ async function fetchRestaurants() {
             return true; // Unique restaurant, keep it
           });
 
-          console.log("✅ Unique Restaurants fetched:", filteredRestaurants);
+          console.log("✅ Unique Restaurants fetched:", restaurants);
 
-          // Store restaurant details globally
-          restaurantDetails = filteredRestaurants.reduce((acc, r) => {
+          // ✅ Store restaurant details globally
+          restaurantDetails = restaurants.reduce((acc, r) => {
             acc[r.name] = r;
             return acc;
           }, {});
@@ -154,9 +139,8 @@ async function fetchRestaurants() {
           setTimeout(() => {
             document.getElementById("loading-gif").style.display = "none"; // ✅ Hide Loading GIF
             document.getElementById("wheel").style.display = "block"; // ✅ Show the wheel
-            updateWheel(filteredRestaurants); // ✅ Update the wheel with restaurant names
+            updateWheel(restaurants); // ✅ Update the wheel with restaurant names
           }, 2000);
-
         })
         .catch(err => {
           console.error("❌ Error fetching restaurants:", err);
@@ -176,7 +160,6 @@ async function fetchRestaurants() {
     document.getElementById("wheel").style.display = "block";
   }
 }
-
 
 
   function updateWheel(restaurants) {

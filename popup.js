@@ -29,8 +29,6 @@ async function saveToHistory(restaurantName) {
 
   // Save the updated history array back to storage
   await chrome.storage.sync.set({ restaurantHistory: history });
-
-  // displayHistory();
 }
 
 // Display history
@@ -55,6 +53,22 @@ async function displayHistory() {
     const li = document.createElement("li");
     li.textContent = restaurantName;  // Only the restaurant name (no need for .name)
     historyList.appendChild(li);
+  });
+}
+
+// Clear history function
+async function clearHistory() {
+  // Clear history from chrome storage
+  await chrome.storage.sync.set({ restaurantHistory: [] });
+
+  // Refresh the history view to reflect the empty history
+  displayHistory();
+
+  // Optionally, show an alert or message to confirm the history has been cleared
+  swal({
+    title: "History cleared!",
+    icon: "success",
+    button: false,
   });
 }
 
@@ -202,6 +216,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Close history view
   document.getElementById("close-history").addEventListener("click", hideHistory);
 
+  // Clear history
+  document.getElementById("clear-history").addEventListener("click", clearHistory);
 
   // Load saved settings into inputs
   const settings = await loadSettings();

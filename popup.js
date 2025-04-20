@@ -194,6 +194,12 @@ function hideSettings() {
   document.getElementById("settings-view").style.display = "none";
 }
 
+// Toggle history view
+function showHistory() {
+  document.getElementById("main-view").style.display = "none";
+  document.getElementById("history-view").style.display = "block";
+}
+
 // Go back to main view from history
 function hideHistory() {
   document.getElementById("main-view").style.display = "block";
@@ -237,7 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("close-settings").addEventListener("click", hideSettings);
 
   // View history button event
-  document.getElementById("view-history").addEventListener("click", toggleHistory);
+  document.getElementById("view-history").addEventListener("click", showHistory);
 
   // Close history view
   document.getElementById("close-history").addEventListener("click", hideHistory);
